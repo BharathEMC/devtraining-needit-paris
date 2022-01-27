@@ -9,27 +9,36 @@
         <name>inc_create (v2)</name>
         <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
 
-    // implement resource here
-	// Get Short discription value from queryParams
-	//var incidentShortDiscValue = request.queryParams.inc_shortdisc;
+    // implementation of Create Incident Logic
 	try {
+	
+	//var impUser = new GlideImpersonate();
+	//impUser.impersonate('62826bf03710200044e0bfc8bcbe5df1');
+		
 	var requestBody = request.body.data;
 	
+	//If any of the mandatory argument are missing through an http exception object 400
+	if (!(requestBody.hasOwnProperty('short_description') && requestBody.hasOwnProperty('impact') && requestBody.hasOwnProperty('urgency') && requestBody.hasOwnProperty('description'))) {
+		return new sn_ws_err.BadRequestError('Mandatory argument for create Incident API are missing');
+	}
+	//Check for the empty value for mandatory arguments
+	if (!(requestBody.short_description && requestBody.impact && requestBody.urgency && requestBody.description)) {
+		return new sn_ws_err.BadRequestError('One or more mandatory argument have empty value');
+	}
+		
 	var inc = new GlideRecord('incident');
 	inc.initialize();
-	inc.short_description = 'Testing v2:: ' + requestBody.short_description;
-	inc.caller_id = 'admin';
+	inc.caller_id = gs.getUserID(); //'admin';
+	inc.short_description =  requestBody.short_description;
 	inc.impact = requestBody.impact; //Creating low impact incident
 	inc.urgency = requestBody.urgency; //Creating low urgency ticket, Severity is auto populated
-	//inc.priority = requestBody.priority; 
-	//inc.setDisplayValue('assignment_group','SMO-Support');
 	inc.description = requestBody.description;
-	
+
 	//Not Mandatory to update
 	inc.contact_type = requestBody.contact_type;
 	inc.category     = requestBody.category;
 	inc.subcategory  = requestBody.subcategory;
-	
+
 	//Create incident record
 	inc.insert();
 
@@ -37,6 +46,7 @@
 	body.msg = "Incident " + inc.number + " Successfully Created";
 	// Send the response object, which is returned to the requestor, to the body object.
 	response.setBody(body);
+		
 	} catch(err) {
 		var myErr = new sn_ws_err.ServiceError();
 		myErr.setStatus(501);
@@ -60,14 +70,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2021-12-14 07:22:19</sys_created_on>
         <sys_id>cb9cb8632f100110d2d0351ef699b661</sys_id>
-        <sys_mod_count>10</sys_mod_count>
+        <sys_mod_count>24</sys_mod_count>
         <sys_name>inc_create (v2)</sys_name>
         <sys_package display_value="NeedIt" source="x_58872_needit">6ead8e780f603200cd674f8ce1050ed1</sys_package>
         <sys_policy/>
         <sys_scope display_value="NeedIt">6ead8e780f603200cd674f8ce1050ed1</sys_scope>
         <sys_update_name>sys_ws_operation_cb9cb8632f100110d2d0351ef699b661</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2021-12-14 12:34:19</sys_updated_on>
+        <sys_updated_on>2021-12-17 12:02:40</sys_updated_on>
         <web_service_definition display_value="Create Incident API">7a168c172f100110d2d0351ef699b66e</web_service_definition>
         <web_service_version display_value="v2">f69cf4632f100110d2d0351ef699b665</web_service_version>
     </sys_ws_operation>
